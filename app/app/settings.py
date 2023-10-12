@@ -47,6 +47,8 @@ INSTALLED_APPS = [
 
     'core',
     'greenhouse',
+    'user',
+    'tokens',
 ]
 
 MIDDLEWARE = [
