@@ -12,7 +12,6 @@ from django.utils.translation import gettext_lazy as _
 
 class UserManager(BaseUserManager):
     """Manager for users."""
-
     def create_user(self, email, password=None, **extra_fields):
         """Create, save and return a new user."""
         if not email:
@@ -40,6 +39,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    greenhouses = models.ManyToManyField('Greenhouse', blank=True, related_name='users')
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -52,15 +53,20 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 class Greenhouse(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     size = models.FloatField(help_text="Size in square meters")
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    sensor_records = models.ManyToManyField('SensorRecord', blank=True, related_name='greenhouses')
+    actuator_statuses = models.ManyToManyField('ActuatorStatus', blank=True, related_name='greenhouses')
+    alerts = models.ManyToManyField('Alert', blank=True, related_name='greenhouses')
 
     def __str__(self):
         return self.name
 
-class SensorData(models.Model):
+class SensorRecord(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE)
     temperature = models.FloatField()
     humidity = models.FloatField()
@@ -75,17 +81,30 @@ class SensorData(models.Model):
         return f"Data for {self.greenhouse.name} at {self.timestamp}"
 
 class ActuatorStatus(models.Model):
+    REQUIRED_ACTION = [
+        ('IRR', 'Irrigation'),
+        ('LIG', 'Lighting'),
+        ('VEN', 'Ventilation'),
+    ]
+    ACTUATOR_STATUS = [
+        ('PEN', 'Pending'),
+        ('RUN', 'Running'),
+        ('FIN', 'Finished'),
+        ('ERR', 'Error'),
+        
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE)
-    irrigation_status = models.BooleanField()
-    lighting_status = models.BooleanField()
-    ventilation_status = models.BooleanField()
+    required_action = models.CharField(max_length=3, choices=REQUIRED_ACTION)
     timestamp = models.DateTimeField(auto_now_add=True)
+    actuator_status = models.CharField(max_length=3, choices=ACTUATOR_STATUS)
 
     def __str__(self):
         return f"Actuator status for {self.greenhouse.name} at {self.timestamp}"
 
 class Alert(models.Model):
-    ALERT_CHOICES = [
+    ALERT_TYPE_OPTIONS = [
         ('HT', 'High Temperature'),
         ('LL', 'Low Luminosity'),
         ('HM', 'High Humidity'),
@@ -96,18 +115,12 @@ class Alert(models.Model):
         ('PH', 'pH Level'),
         ('NL', 'Nutrient Level'),
     ]
-    STATUS_CHOICES = [
-        ('UN', 'Unacknowledged'),
-        ('AC', 'Acknowledged'),
-        ('RE', 'Resolved'),
-        ('CL', 'Closed')
-    ]
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE)
-    alert_type = models.CharField(max_length=2, choices=ALERT_CHOICES)
+    alert_type = models.CharField(max_length=2, choices=ALERT_TYPE_OPTIONS)
     description = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=2, choices=STATUS_CHOICES)
 
     def __str__(self):
         return f"{self.get_alert_type_display()} for {self.greenhouse.name} at {self.timestamp}"
