@@ -1,6 +1,3 @@
-"""
-Database models.
-"""
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -9,6 +6,7 @@ from django.contrib.auth.models import (
 )
 import uuid
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 class UserManager(BaseUserManager):
     """Manager for users."""
@@ -39,7 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    greenhouses = models.ManyToManyField('Greenhouse', blank=True, related_name='users')
+    greenhouses = models.ManyToManyField('Greenhouse', blank=True, related_name='user_greenhouses')
 
     objects = UserManager()
 
@@ -51,23 +49,21 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
+    
 class Greenhouse(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     size = models.FloatField(help_text="Size in square meters")
 
-    sensor_records = models.ManyToManyField('SensorRecord', blank=True, related_name='greenhouses')
-    actuator_statuses = models.ManyToManyField('ActuatorStatus', blank=True, related_name='greenhouses')
-    alerts = models.ManyToManyField('Alert', blank=True, related_name='greenhouses')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='greenhouse_users', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
 class SensorRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE)
+    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='sensor_records')
     temperature = models.FloatField()
     humidity = models.FloatField()
     luminosity = models.FloatField()
@@ -95,7 +91,7 @@ class ActuatorStatus(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE)
+    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='actuator_statuses')
     required_action = models.CharField(max_length=3, choices=REQUIRED_ACTION)
     timestamp = models.DateTimeField(auto_now_add=True)
     actuator_status = models.CharField(max_length=3, choices=ACTUATOR_STATUS)
@@ -117,7 +113,7 @@ class Alert(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE)
+    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='alerts')
     alert_type = models.CharField(max_length=2, choices=ALERT_TYPE_OPTIONS)
     description = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
