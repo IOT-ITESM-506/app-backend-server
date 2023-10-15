@@ -5,6 +5,8 @@ from greenhouse.api import views
 
 router = DefaultRouter()
 router.register('greenhouse', views.GreenhouseViewSet)
+router.register('sensor-record', views.SensorRecordViewSet)
+router.register('actuator-status', views.ActuatorStatusViewSet)
 
 app_name = 'greenhouse'
 

@@ -73,6 +73,8 @@ class SensorRecord(models.Model):
     nutrient_level = models.FloatField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sensor_records', on_delete=models.CASCADE)
+
     def __str__(self):
         return f"Data for {self.greenhouse.name} at {self.timestamp}"
 
@@ -96,6 +98,8 @@ class ActuatorStatus(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     actuator_status = models.CharField(max_length=3, choices=ACTUATOR_STATUS)
 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='actuator_statuses', on_delete=models.CASCADE)
+
     def __str__(self):
         return f"Actuator status for {self.greenhouse.name} at {self.timestamp}"
 
@@ -117,6 +121,8 @@ class Alert(models.Model):
     alert_type = models.CharField(max_length=2, choices=ALERT_TYPE_OPTIONS)
     description = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='alerts', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.get_alert_type_display()} for {self.greenhouse.name} at {self.timestamp}"

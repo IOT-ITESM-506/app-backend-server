@@ -32,5 +32,5 @@ urlpatterns = [
     path('api/health-check/', HealthCheckView.as_view(), name='health-check'),
     path('api/user/', include('user.api.urls'), name='user-api'),
     path('api/token/', include('tokens.api.urls'), name='token-api'),
-    path('api/greenhouse/', include('greenhouse.api.urls'), name='greenhouse-api'),
+    path('api/', include('greenhouse.api.urls'), name='greenhouse-api'),
 ]
