@@ -1,0 +1,23 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t ${{ secrets.ECR_REGISTRY }}/django-app:${{ github.sha }} .
+        docker push ${{ secrets.ECR_REGISTRY }}/django-app:${{ github.sha }}
