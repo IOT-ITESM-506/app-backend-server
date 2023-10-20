@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Docker Login
 
 on:
   push:
@@ -6,23 +6,18 @@ on:
       - development
 
 jobs:
-  build:
+  docker-login:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Login to Amazon ECR
+    - name: Login to Docker Registry
       run: |
-        AWS_REGISTRY_URL="${{ secrets.ECR_REGISTRY }}"
-        AWS_REGION="${{ secrets.AWS_REGION }}"
-        AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
-        AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-
-        echo $AWS_SECRET_ACCESS_KEY | docker login --username AWS --password-stdin $AWS_REGISTRY_URL
+        echo "${{ secrets.AWS_SECRET_ACCESS_KEY }}" | docker login --username AWS --password-stdin "${{ secrets.ECR_REGISTRY }}"
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t ${{ secrets.ECR_REGISTRY }}/django-app-repo:${{ github.sha }} .
-        docker push ${{ secrets.ECR_REGISTRY }}/django-app-repo:${{ github.sha }}
+        docker build -t "${{ secrets.ECR_REGISTRY }}/mi-aplicacion:${{ github.sha }}" .
+        docker push "${{ secrets.ECR_REGISTRY }}/mi-aplicacion:${{ github.sha }}"
