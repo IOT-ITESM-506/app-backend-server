@@ -1,4 +1,4 @@
-name: Docker Login
+name: Build and Push Docker Image
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - development
 
 jobs:
-  docker-login:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,9 +15,12 @@ jobs:
 
     - name: Login to Docker Registry
       run: |
-        echo "${{ secrets.AWS_SECRET_ACCESS_KEY }}" | docker login --username AWS --password-stdin "${{ secrets.ECR_REGISTRY }}"
+        AWS_REGION="us-east-1"
+        AWS_REGISTRY_URL="711704289087.dkr.ecr.us-east-1.amazonaws.com"        
+        TOKEN=$(aws ecr get-login-password --region $AWS_REGION)        
+        echo $TOKEN | docker login --username AWS --password-stdin $AWS_REGISTRY_URL
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t "${{ secrets.ECR_REGISTRY }}/mi-aplicacion:${{ github.sha }}" .
-        docker push "${{ secrets.ECR_REGISTRY }}/mi-aplicacion:${{ github.sha }}"
+        docker build -t 711704289087.dkr.ecr.us-east-1.amazonaws.com/mi-aplicacion:${{ github.sha }} .
+        docker push 711704289087.dkr.ecr.us-east-1.amazonaws.com/mi-aplicacion:${{ github.sha }}
