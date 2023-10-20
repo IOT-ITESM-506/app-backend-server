@@ -20,18 +20,15 @@ jobs:
         AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
         AWS_REGISTRY_URL="711704289087.dkr.ecr.us-east-1.amazonaws.com"
         
-        # Configura las credenciales de AWS
         aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
         aws configure set default.region $AWS_REGION
         
-        # Obtén el token de acceso para ECR
         TOKEN=$(aws ecr get-login-password --region $AWS_REGION)
         
-        # Inicia sesión en Docker
         echo $TOKEN | docker login --username AWS --password-stdin $AWS_REGISTRY_URL
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t 711704289087.dkr.ecr.us-east-1.amazonaws.com/mi-aplicacion:${{ github.sha }} .
-        docker push 711704289087.dkr.ecr.us-east-1.amazonaws.com/mi-aplicacion:${{ github.sha }}
+        docker build -t 711704289087.dkr.ecr.us-east-1.amazonaws.com/django-app-repo:${{ github.sha }} .
+        docker push 711704289087.dkr.ecr.us-east-1.amazonaws.com/django-app-repo:${{ github.sha }}
