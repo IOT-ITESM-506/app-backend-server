@@ -15,9 +15,12 @@ jobs:
 
     - name: Login to Amazon ECR
       run: |
-        echo ${{ secrets.AWS_ACCESS_KEY_ID }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+        AWS_REGISTRY_URL="${{ secrets.ECR_REGISTRY }}"
+        AWS_REGION="${{ secrets.AWS_REGION }}"
+        AWS_PASSWORD=$(aws ecr get-login-password --region $AWS_REGION)
+        echo $AWS_PASSWORD | docker login --username AWS --password-stdin $AWS_REGISTRY_URL
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t ${{ secrets.ECR_REGISTRY }}/django-app:${{ github.sha }} .
-        docker push ${{ secrets.ECR_REGISTRY }}/django-app:${{ github.sha }}
+        docker build -t ${{ secrets.ECR_REGISTRY }}/django-app-repo:${{ github.sha }} .
+        docker push ${{ secrets.ECR_REGISTRY }}/django-app-repo:${{ github.sha }}
