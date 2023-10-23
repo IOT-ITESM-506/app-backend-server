@@ -36,7 +36,7 @@
     <li>Access your Django application at <code>http://localhost:8000</code> in your web browser.</li>
 </ol>
 
-# Greenhouse Monitoring System - Database Documentation
+# Database Documentation
 
 This Django project implements a Greenhouse Monitoring System with a PostgreSQL database. Below is an overview of the database schema and relationships.
 
