@@ -2,7 +2,7 @@
 <html>
 <body>
 
-<h1>App Backend Server</h1>
+<h1>Greenhouse Monitoring System REST SERVER</h1>
 
 <p>This document provides an overview of the Docker Compose configuration defined in the <code>docker-compose.yml</code> file.</p>
 
@@ -35,11 +35,6 @@
     <li>Run <code>docker-compose up</code> to build and start your application.</li>
     <li>Access your Django application at <code>http://localhost:8000</code> in your web browser.</li>
 </ol>
-
-<h2>Notes</h2>
-
-
-
 
 # Greenhouse Monitoring System - Database Documentation
 
