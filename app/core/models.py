@@ -52,6 +52,7 @@ class Greenhouse(models.Model):
     name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     size = models.FloatField(help_text="Size in square meters")
+    greenhouse_description = models.TextField(blank=True)
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='greenhouse_users', on_delete=models.CASCADE)
 
