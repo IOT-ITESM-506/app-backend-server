@@ -2,7 +2,7 @@
 <html>
 <body>
 
-<h1>App Backend Server</h1>
+<h1>Greenhouse Monitoring System REST SERVER</h1>
 
 <p>This document provides an overview of the Docker Compose configuration defined in the <code>docker-compose.yml</code> file.</p>
 
@@ -36,7 +36,69 @@
     <li>Access your Django application at <code>http://localhost:8000</code> in your web browser.</li>
 </ol>
 
-<h2>Notes</h2>
+# Database Documentation
+
+This Django project implements a Greenhouse Monitoring System with a PostgreSQL database. Below is an overview of the database schema and relationships.
+
+## Database Architecture
+
+| Model            | Description                                                     | Relationships                                          |
+|------------------|-----------------------------------------------------------------|--------------------------------------------------------|
+| **User**         | Represents a user in the system.                                |                                                        |
+|                  | Inherits from Django's `AbstractBaseUser` and `PermissionsMixin`.|                                                        |
+|                  | Fields: `email`, `first_name`, `last_name`, `is_active`, `is_staff`.|                                                    |
+|                  | Associated with: `Greenhouse`, `SensorRecord`, `ActuatorStatus`, `Alert`.|                                             |
+| **Greenhouse**   | Represents a greenhouse with fields like `name`, `location`, `size`.|                                                |
+|                  | Fields: `name`, `location`, `size`.                             |                                                        |
+|                  | Connected to: `User` via Foreign Key (Many-to-One).             |                                                        |
+| **SensorRecord** | Stores sensor data records.                                     |                                                        |
+|                  | Fields: `temperature`, `humidity`, `luminosity`, `CO2_level`, `soil_moisture`, `pH`, `nutrient_level`.|       |
+|                  | Connected to: `User` and `Greenhouse` via Foreign Key (Many-to-One).|                                             |
+| **ActuatorStatus**| Manages the status of actuators.                                 |                                                        |
+|                  | Fields: `required_action`, `actuator_status`.                   |                                                        |
+|                  | Connected to: `User` and `Greenhouse` via Foreign Key (Many-to-One).|                                             |
+| **Alert**        | Stores alerts triggered by various conditions in a greenhouse.  |                                                        |
+|                  | Fields: `alert_type`, `description`.                            |                                                        |
+|                  | Connected to: `User` and `Greenhouse` via Foreign Key (Many-to-One).|                                             |
+
+## Relationships
+
+- **User to Greenhouse:**
+  - A user can own multiple greenhouses.
+  - Each greenhouse is associated with a single user.
+
+- **Greenhouse to SensorRecord:**
+  - A greenhouse can have multiple sensor records.
+  - Each sensor record is linked to a specific greenhouse.
+
+- **Greenhouse to ActuatorStatus:**
+  - A greenhouse can have multiple actuator statuses.
+  - Each actuator status entry is associated with a specific greenhouse.
+
+- **Greenhouse to Alert:**
+  - A greenhouse can have multiple alerts.
+  - Each alert is linked to a specific greenhouse.
+
+- **User to SensorRecord, ActuatorStatus, and Alert:**
+  - Each sensor record, actuator status, and alert is associated with a specific user.
+
+## Getting Started
+
+To set up and run the project:
+
+1. Clone this repository to your local machine.
+2. Install the required dependencies using `pip install -r requirements.txt`.
+3. Run migrations to apply the database schema: `python manage.py migrate`.
+4. Create a superuser account: `python manage.py createsuperuser`.
+5. Start the development server: `python manage.py runserver`.
+
+## Contribution
+
+Feel free to contribute to the development of this Greenhouse Monitoring System by opening issues or sending pull requests.
+
+## License
+
+This project is licensed under [license name]. Refer to the LICENSE.md file for more details.
 
 <p>This Docker Compose configuration is designed to set up a development environment for your Django application. Make sure to adjust the configuration and environment variables as needed for your specific project requirements.</p>
 
