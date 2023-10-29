@@ -34,14 +34,10 @@ class SensorRecordViewSet(viewsets.ModelViewSet):
     serializer_class = SensorRecordSerializer
     queryset = SensorRecord.objects.all()
     permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Retrieve recipes for authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
     
     def perform_create(self, serializer):
         """Create a new sensor record."""
-        serializer.save(user=self.request.user)
+        serializer.save()
 
 class ActuatorStatusViewSet(viewsets.ModelViewSet):
     """Manage actuator statuses in the database."""

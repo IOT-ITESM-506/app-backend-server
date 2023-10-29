@@ -35,6 +35,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
+    greenhouse_role = models.CharField(max_length=255, blank=True)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -53,7 +55,11 @@ class Greenhouse(models.Model):
     location = models.CharField(max_length=255)
     size = models.FloatField(help_text="Size in square meters")
     greenhouse_description = models.TextField(blank=True)
+    logo = models.URLField(blank=True)
 
+    is_active = models.BooleanField(default=True)
+
+    sensor_record_circuit_id = models.UUIDField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='greenhouse_users', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -61,7 +67,6 @@ class Greenhouse(models.Model):
 
 class SensorRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='sensor_records')
     temperature = models.FloatField()
     humidity = models.FloatField()
     luminosity = models.FloatField()
@@ -71,7 +76,8 @@ class SensorRecord(models.Model):
     nutrient_level = models.FloatField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sensor_records', on_delete=models.CASCADE)
+    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='sensor_records')
+    sensor_record_circuit_id = models.UUIDField()
 
     def __str__(self):
         return f"Data for {self.greenhouse.name} at {self.timestamp}"
@@ -89,14 +95,13 @@ class ActuatorStatus(models.Model):
         ('ERR', 'Error'),
         
     ]
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='actuator_statuses')
     required_action = models.CharField(max_length=3, choices=REQUIRED_ACTION)
     timestamp = models.DateTimeField(auto_now_add=True)
     actuator_status = models.CharField(max_length=3, choices=ACTUATOR_STATUS)
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='actuator_statuses', on_delete=models.CASCADE)
+    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='actuator_statuses')
+    sensor_record_circuit_id = models.UUIDField()
 
     def __str__(self):
         return f"Actuator status for {self.greenhouse.name} at {self.timestamp}"
@@ -112,15 +117,19 @@ class Alert(models.Model):
         ('SM', 'Soil Moisture'),
         ('PH', 'pH Level'),
         ('NL', 'Nutrient Level'),
+        ('OT', 'Other'),
+        ('NA', 'N/A'),
+        ('UN', 'Unknown'),
+        ('ER', 'Error'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='alerts')
     alert_type = models.CharField(max_length=2, choices=ALERT_TYPE_OPTIONS)
     description = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='alerts', on_delete=models.CASCADE)
+    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='alerts')
+    sensor_record_circuit_id = models.UUIDField()
 
     def __str__(self):
         return f"{self.get_alert_type_display()} for {self.greenhouse.name} at {self.timestamp}"
