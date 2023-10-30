@@ -1,6 +1,8 @@
 """Views for the greenhouse API."""
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 
 from core.models import (
     Greenhouse,
@@ -24,6 +26,14 @@ class GreenhouseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retrieve recipes for authenticated user."""
         return self.queryset.filter(user=self.request.user).order_by('-id')
+    
+    def retrieve(self, request, *args, **kwargs):
+        """Retrieve a specific greenhouse by name."""
+        name = kwargs.get('pk')
+        greenhouses = self.queryset.filter(name__icontains=name, user=request.user)
+        serializer = self.get_serializer(greenhouses, many=True)
+        return Response(serializer.data)
+
     
     def perform_create(self, serializer):
         """Create a new greenhouse."""

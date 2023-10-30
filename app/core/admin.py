@@ -6,5 +6,4 @@ from core.models import User, Greenhouse, SensorRecord, ActuatorStatus, Alert
 admin.site.register(User)
 admin.site.register(Greenhouse)
 admin.site.register(SensorRecord)
-admin.site.register(ActuatorStatus)
 admin.site.register(Alert)
