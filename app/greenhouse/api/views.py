@@ -49,31 +49,25 @@ class SensorRecordViewSet(viewsets.ModelViewSet):
         """Create a new sensor record."""
         serializer.save()
 
+class AlertViewSet(viewsets.ModelViewSet):
+    """Manage alerts in the database."""
+    serializer_class = AlertSerializer
+    queryset = Alert.objects.all().order_by('-id')
+    permission_classes = [IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        """Create a new alert."""
+        serializer.save()
+
 class ActuatorStatusViewSet(viewsets.ModelViewSet):
     """Manage actuator statuses in the database."""
     serializer_class = ActuatorStatusSerializer
     queryset = ActuatorStatus.objects.all()
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        """Retrieve recipes for authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
-    
+
     def perform_create(self, serializer):
         """Create a new actuator status."""
-        serializer.save(user=self.request.user)
+        serializer.save()
 
 
-class AlertViewSet(viewsets.ModelViewSet):
-    """Manage alerts in the database."""
-    serializer_class = AlertSerializer
-    queryset = Alert.objects.all()
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Retrieve recipes for authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
-    
-    def perform_create(self, serializer):
-        """Create a new alert."""
-        serializer.save(user=self.request.user)

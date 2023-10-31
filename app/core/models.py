@@ -36,6 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
     greenhouse_role = models.CharField(max_length=255, blank=True)
+    role = models.CharField(max_length=255, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -109,7 +110,6 @@ class Alert(models.Model):
 
     def __str__(self):
         return f"{self.get_alert_type_display()} for {self.greenhouse.name} at {self.timestamp}"
-
 
 
 class ActuatorStatus(models.Model):
