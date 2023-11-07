@@ -1,8 +1,8 @@
 """Views for the greenhouse API."""
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
+from django.http import Http404
+
 
 from core.models import (
     Greenhouse,
@@ -20,33 +20,27 @@ from greenhouse.api.serializers import (
 class GreenhouseViewSet(viewsets.ModelViewSet):
     """Manage greenhouse in the database."""
     serializer_class = GreenhouseSerializer
-    queryset = Greenhouse.objects.all()
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Retrieve greenhouses for authenticated user."""
         sensor_record_circuit_id = self.request.query_params.get('sensor_record_circuit_id', None)
+        user = self.request.query_params.get('user', None)
 
+        if not sensor_record_circuit_id and not user:
+            raise Http404("Debe proporcionar al menos un parámetro de filtrado")
+
+        queryset = Greenhouse.objects.all()
         if sensor_record_circuit_id:
-            greenhouses = self.queryset.filter(sensor_record_circuit_id=sensor_record_circuit_id, user=self.request.user).order_by('-id')
-            if not greenhouses.exists():
-                return self.queryset.filter(user=self.request.user).order_by('-id')
-            return greenhouses
-        else:
-            return self.queryset.filter(user=self.request.user).order_by('-id')
-        
-    
-    def retrieve(self, request, *args, **kwargs):
-        """Retrieve a specific greenhouse by name."""
-        name = kwargs.get('pk')
-        greenhouses = self.queryset.filter(name__icontains=name, user=request.user)
-        serializer = self.get_serializer(greenhouses, many=True)
-        return Response(serializer.data)
+            queryset = queryset.filter(sensor_record_circuit_id=sensor_record_circuit_id)
+        if user:
+            queryset = queryset.filter(user=user)
+        if not queryset.exists():
+            raise Http404("No se encontraron invernaderos con los parámetros proporcionados")
 
-    
+        return queryset
+
     def perform_create(self, serializer):
         """Create a new greenhouse."""
-        serializer.save(user=self.request.user)
+        serializer.save()
 
 class SensorRecordViewSet(viewsets.ModelViewSet):
     """Manage sensor records in the database."""

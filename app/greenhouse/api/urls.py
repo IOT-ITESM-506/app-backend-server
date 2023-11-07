@@ -4,9 +4,9 @@ from rest_framework.routers import DefaultRouter
 from greenhouse.api import views
 
 router = DefaultRouter()
-router.register('greenhouse', views.GreenhouseViewSet)
-router.register('sensor-record', views.SensorRecordViewSet)
-router.register("alerts", views.AlertViewSet)
+router.register('greenhouse', views.GreenhouseViewSet, basename='greenhouse')
+router.register('sensor-record', views.SensorRecordViewSet, basename='sensor-record')
+router.register("alerts", views.AlertViewSet, basename="alerts")
 
 app_name = 'greenhouse'
 

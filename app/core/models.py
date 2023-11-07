@@ -60,7 +60,9 @@ class Greenhouse(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    sensor_record_circuit_id = models.UUIDField()
+
+    # sensor_record_circuit_id must be unique for each greenhouse
+    sensor_record_circuit_id = models.UUIDField(unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='greenhouse_users', on_delete=models.CASCADE)
 
     def __str__(self):
