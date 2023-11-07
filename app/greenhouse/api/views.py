@@ -24,8 +24,17 @@ class GreenhouseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Retrieve recipes for authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
+        """Retrieve greenhouses for authenticated user."""
+        sensor_record_circuit_id = self.request.query_params.get('sensor_record_circuit_id', None)
+
+        if sensor_record_circuit_id:
+            greenhouses = self.queryset.filter(sensor_record_circuit_id=sensor_record_circuit_id, user=self.request.user).order_by('-id')
+            if not greenhouses.exists():
+                return self.queryset.filter(user=self.request.user).order_by('-id')
+            return greenhouses
+        else:
+            return self.queryset.filter(user=self.request.user).order_by('-id')
+        
     
     def retrieve(self, request, *args, **kwargs):
         """Retrieve a specific greenhouse by name."""
@@ -44,10 +53,16 @@ class SensorRecordViewSet(viewsets.ModelViewSet):
     serializer_class = SensorRecordSerializer
     queryset = SensorRecord.objects.all()
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Retrieve sensor records for authenticated user."""
+        return self.queryset.filter(greenhouse__user=self.request.user)
     
     def perform_create(self, serializer):
         """Create a new sensor record."""
+        self.permission_classes = []
         serializer.save()
+        self.permission_classes = [IsAuthenticated]
 
 class AlertViewSet(viewsets.ModelViewSet):
     """Manage alerts in the database."""

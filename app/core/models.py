@@ -78,7 +78,6 @@ class SensorRecord(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='sensor_records')
-    sensor_record_circuit_id = models.UUIDField()
 
     def __str__(self):
         return f"Data for {self.greenhouse.name} at {self.timestamp}"
