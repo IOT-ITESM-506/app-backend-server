@@ -46,17 +46,10 @@ class SensorRecordViewSet(viewsets.ModelViewSet):
     """Manage sensor records in the database."""
     serializer_class = SensorRecordSerializer
     queryset = SensorRecord.objects.all()
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Retrieve sensor records for authenticated user."""
-        return self.queryset.filter(greenhouse__user=self.request.user)
     
     def perform_create(self, serializer):
         """Create a new sensor record."""
-        self.permission_classes = []
         serializer.save()
-        self.permission_classes = [IsAuthenticated]
 
 class AlertViewSet(viewsets.ModelViewSet):
     """Manage alerts in the database."""
