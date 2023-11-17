@@ -95,10 +95,10 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
+        'HOST': 'iot.ctltkkprxhwl.us-east-1.rds.amazonaws.com',
+        'NAME': 'postgres',
+        'USER': 'edu',
+        'PASSWORD': 'T3rraPass2023',
     }
 }
 
