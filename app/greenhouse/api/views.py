@@ -2,18 +2,16 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django.http import Http404
-
+from rest_framework.response import Response
 
 from core.models import (
     Greenhouse,
     SensorRecord,
-    ActuatorStatus,
     Alert,
 )
 from greenhouse.api.serializers import (
     GreenhouseSerializer,
     SensorRecordSerializer,
-    ActuatorStatusSerializer,
     AlertSerializer,
 )
 
@@ -42,6 +40,17 @@ class GreenhouseViewSet(viewsets.ModelViewSet):
         """Create a new greenhouse."""
         serializer.save()
 
+    def retrieve(self, request, *args, **kwargs):
+        """Retrieve a greenhouse by ID with user filter."""
+        instance = self.get_object()
+        user = self.request.query_params.get('user', None)
+
+        if user and instance.user != user:
+            raise Http404("No se encontró el invernadero con el ID proporcionado para el usuario especificado")
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
 class SensorRecordViewSet(viewsets.ModelViewSet):
     """Manage sensor records in the database."""
     serializer_class = SensorRecordSerializer
@@ -60,16 +69,3 @@ class AlertViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create a new alert."""
         serializer.save()
-
-class ActuatorStatusViewSet(viewsets.ModelViewSet):
-    """Manage actuator statuses in the database."""
-    serializer_class = ActuatorStatusSerializer
-    queryset = ActuatorStatus.objects.all()
-    permission_classes = [IsAuthenticated]
-
-
-    def perform_create(self, serializer):
-        """Create a new actuator status."""
-        serializer.save()
-
-

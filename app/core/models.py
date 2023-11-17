@@ -60,9 +60,7 @@ class Greenhouse(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-
-    # sensor_record_circuit_id must be unique for each greenhouse
-    sensor_record_circuit_id = models.UUIDField(unique=True)
+    microcontroller_mac_address = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='greenhouse_users', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -73,10 +71,6 @@ class SensorRecord(models.Model):
     temperature = models.FloatField()
     humidity = models.FloatField()
     luminosity = models.FloatField()
-    CO2_level = models.FloatField()
-    soil_moisture = models.FloatField()
-    pH = models.FloatField(null=True, blank=True)
-    nutrient_level = models.FloatField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='sensor_records')
@@ -90,11 +84,6 @@ class Alert(models.Model):
         ('LL', 'Low Luminosity'),
         ('HM', 'High Humidity'),
         ('LM', 'Low Humidity'),
-        ('HC', 'High CO2 Level'),
-        ('LC', 'Low CO2 Level'),
-        ('SM', 'Soil Moisture'),
-        ('PH', 'pH Level'),
-        ('NL', 'Nutrient Level'),
         ('OT', 'Other'),
         ('NA', 'N/A'),
         ('UN', 'Unknown'),
@@ -107,32 +96,6 @@ class Alert(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='alerts')
-    sensor_record_circuit_id = models.UUIDField()
 
     def __str__(self):
         return f"{self.get_alert_type_display()} for {self.greenhouse.name} at {self.timestamp}"
-
-
-class ActuatorStatus(models.Model):
-    REQUIRED_ACTION = [
-        ('IRR', 'Irrigation'),
-        ('LIG', 'Lighting'),
-        ('VEN', 'Ventilation'),
-    ]
-    ACTUATOR_STATUS = [
-        ('PEN', 'Pending'),
-        ('RUN', 'Running'),
-        ('FIN', 'Finished'),
-        ('ERR', 'Error'),
-        
-    ]
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    required_action = models.CharField(max_length=3, choices=REQUIRED_ACTION)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    actuator_status = models.CharField(max_length=3, choices=ACTUATOR_STATUS)
-
-    greenhouse = models.ForeignKey(Greenhouse, on_delete=models.CASCADE, related_name='actuator_statuses')
-    sensor_record_circuit_id = models.UUIDField()
-
-    def __str__(self):
-        return f"Actuator status for {self.greenhouse.name} at {self.timestamp}"
