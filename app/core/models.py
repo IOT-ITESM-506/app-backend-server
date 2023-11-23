@@ -68,7 +68,6 @@ class Greenhouse(models.Model):
 
 class SensorRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    temperature = models.FloatField()
     humidity = models.FloatField()
     luminosity = models.FloatField()
     timestamp = models.DateTimeField(auto_now_add=True)
