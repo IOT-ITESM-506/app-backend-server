@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django.http import Http404
 from rest_framework.response import Response
+from rest_framework import filters
 
 from core.models import (
     Greenhouse,
@@ -18,38 +19,15 @@ from greenhouse.api.serializers import (
 class GreenhouseViewSet(viewsets.ModelViewSet):
     """Manage greenhouse in the database."""
     serializer_class = GreenhouseSerializer
+    queryset = Greenhouse.objects.all()
 
-    def get_queryset(self):
-        sensor_record_circuit_id = self.request.query_params.get('sensor_record_circuit_id', None)
-        user = self.request.query_params.get('user', None)
-
-        if not sensor_record_circuit_id and not user:
-            raise Http404("Debe proporcionar al menos un parámetro de filtrado")
-
-        queryset = Greenhouse.objects.all()
-        if sensor_record_circuit_id:
-            queryset = queryset.filter(sensor_record_circuit_id=sensor_record_circuit_id)
-        if user:
-            queryset = queryset.filter(user=user)
-        if not queryset.exists():
-            raise Http404("No se encontraron invernaderos con los parámetros proporcionados")
-
-        return queryset
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['id', 'user__id', 'microcontroller_mac_address']
 
     def perform_create(self, serializer):
         """Create a new greenhouse."""
         serializer.save()
 
-    def retrieve(self, request, *args, **kwargs):
-        """Retrieve a greenhouse by ID with user filter."""
-        instance = self.get_object()
-        user = self.request.query_params.get('user', None)
-
-        if user and instance.user != user:
-            raise Http404("No se encontró el invernadero con el ID proporcionado para el usuario especificado")
-
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
 
 class SensorRecordViewSet(viewsets.ModelViewSet):
     """Manage sensor records in the database."""

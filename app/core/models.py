@@ -8,6 +8,7 @@ import uuid
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
+
 class UserManager(BaseUserManager):
     """Manager for users."""
     def create_user(self, email, password=None, **extra_fields):
